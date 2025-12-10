@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { NavbarComponent } from '../navbar/navbar.component';
-import { FooterComponent } from '../footer/footer.component';
+import { AuthService } from '../../../core/services/auth.service';
+import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { FooterComponent } from '../../../shared/components/footer/footer.component';
 
 interface Developer {
   id: number;
@@ -47,8 +47,8 @@ export class PortfolioComponent implements OnInit {
       greeting: '¡Qué onda Mijo!',
       description: 'Soy Alexander Chuquipoma, un desarrollador web apasionado por crear soluciones innovadoras y eficientes.',
       bio: 'He trabajado con Angular, Firebase y arquitecturas modernas basadas en microservicios.',
-      github: '#',
-      linkedin: '#'
+      github: 'https://github.com/AlexChuquipoma',
+      linkedin: 'https://www.linkedin.com/in/alexander-chuquipoma-a62686220/'
     },
     {
       id: 2,
@@ -125,5 +125,13 @@ export class PortfolioComponent implements OnInit {
 
   goToLogin(): void {
     this.router.navigate(['/login']);
+  }
+
+  goToProfile(developerId: number): void {
+    if (developerId === 1) {
+      this.router.navigate(['/portfolio/alexander']);
+    } else if (developerId === 2) {
+      this.router.navigate(['/portfolio/juan']);
+    }
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, user, updateProfile } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
-import { User } from '../models/user.model';
+import { User } from '../../shared/models/user.model';
 
 @Injectable({
   providedIn: 'root'
