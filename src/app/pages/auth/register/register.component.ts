@@ -52,16 +52,22 @@ export class RegisterComponent {
       this.isLoading = true;
       this.errorMessage = '';
       this.successMessage = '';
-      
+
       const { name, email, password } = this.registerForm.value;
-      
+
       const result = await this.authService.register({ name, email, password });
-      
+
       if (result.success) {
-        this.successMessage = '¡Registro exitoso! Redirigiendo...';
+        this.successMessage = '¡Registro exitoso! Redirigiendo al login...';
+
+        // Cerrar sesión automáticamente después de registrarse
+        await this.authService.logout();
+
+        // Redirigir al login después de 2 segundos
         setTimeout(() => {
+          this.isLoading = false;
           this.router.navigate(['/login']);
-        }, 1500);
+        }, 2000);
       } else {
         this.errorMessage = result.message;
         this.isLoading = false;

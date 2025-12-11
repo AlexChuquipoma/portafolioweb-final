@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
+import { AdvisoryModalComponent } from '../../../shared/components/advisory-modal/advisory-modal.component';
 
 interface Developer {
   id: number;
@@ -31,13 +32,14 @@ interface Skill {
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, FooterComponent],
+  imports: [CommonModule, NavbarComponent, FooterComponent, AdvisoryModalComponent],
   templateUrl: './portfolio.component.html',
   styleUrl: './portfolio.css'
 })
 export class PortfolioComponent implements OnInit {
   currentUser: any = null;
   menuOpen = false;
+  showAdvisoryModal = false;
 
   developers: Developer[] = [
     {
@@ -53,7 +55,11 @@ export class PortfolioComponent implements OnInit {
     {
       id: 2,
       name: 'Juan Fernández',
+<<<<<<< HEAD
       image: '/imagenes/juanperfil.jpg',
+=======
+      image: '/imagenes/juan.png',
+>>>>>>> 33fe33bf647b6340ec60b465e87b8af12983b7b9
       greeting: '¡Holaa!',
       description: 'Soy Juan Fernández, un desarrollador web dedicado a construir aplicaciones web atractivas y funcionales.',
       bio: 'Tengo experiencia en el desarrollo front-end y back-end, utilizando tecnologías como Angular, Node.js y bases de datos NoSQL.',
@@ -133,5 +139,19 @@ export class PortfolioComponent implements OnInit {
     } else if (developerId === 2) {
       this.router.navigate(['/portfolio/juan']);
     }
+  }
+
+  openAdvisoryModal(): void {
+    // Verificar si el usuario está autenticado
+    if (!this.currentUser) {
+      alert('Por favor inicia sesión para agendar una asesoría');
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.showAdvisoryModal = true;
+  }
+
+  closeAdvisoryModal(): void {
+    this.showAdvisoryModal = false;
   }
 }
