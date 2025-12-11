@@ -7,7 +7,9 @@ import { PortfolioJuanComponent } from './pages/developer/juan/portfolio-juan.co
 import { AdminDashboardComponent } from './pages/admin/admin-dashboard.component';
 import { ProgrammerDashboardComponent } from './pages/programmer/programmer-dashboard.component';
 import { SetupComponent } from './pages/setup/setup.component';
+import { UserProfile } from './pages/user-profile/user-profile';
 import { adminGuard, programmerGuard } from './core/guards/role.guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/portfolio', pathMatch: 'full' },
@@ -17,6 +19,13 @@ export const routes: Routes = [
   { path: 'portfolio/alexander', component: PortfolioAlexanderComponent },
   { path: 'portfolio/juan', component: PortfolioJuanComponent },
   { path: 'setup', component: SetupComponent },
+
+  // Ruta de perfil (requiere autenticación)
+  {
+    path: 'profile',
+    component: UserProfile,
+    canActivate: [authGuard]
+  },
 
   // Rutas protegidas por rol
   {

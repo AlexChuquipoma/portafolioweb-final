@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { NavbarComponent, NavMenuItem } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { AdvisoryModalComponent } from '../../../shared/components/advisory-modal/advisory-modal.component';
 
@@ -40,6 +40,7 @@ export class PortfolioComponent implements OnInit {
   currentUser: any = null;
   menuOpen = false;
   showAdvisoryModal = false;
+  navMenuItems: NavMenuItem[] = [];
 
   developers: Developer[] = [
     {
@@ -102,14 +103,30 @@ export class PortfolioComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     // Suscribirse a los cambios del usuario
     this.authService.user$.subscribe(user => {
       this.currentUser = user;
+      if (user) {
+        this.initializeNavMenu();
+      }
+      // Forzar detección de cambios después de actualizar currentUser
+      this.cdr.detectChanges();
     });
+  }
+
+  initializeNavMenu(): void {
+    this.navMenuItems = [
+      {
+        label: 'Mi Perfil',
+        icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>',
+        action: () => this.router.navigate(['/profile'])
+      }
+    ];
   }
 
   toggleMenu(): void {
@@ -135,9 +152,13 @@ export class PortfolioComponent implements OnInit {
 
   goToProfile(developerId: number): void {
     if (developerId === 1) {
-      this.router.navigate(['/portfolio/alexander']);
+      this.router.navigate(['/portfolio/alexander']).then(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     } else if (developerId === 2) {
-      this.router.navigate(['/portfolio/juan']);
+      this.router.navigate(['/portfolio/juan']).then(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     }
   }
 

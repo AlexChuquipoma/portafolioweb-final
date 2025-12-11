@@ -1,11 +1,14 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import { AdvisoryService } from '../../../core/services/advisory.service';
+import { ScheduleService } from '../../../core/services/schedule.service';
+import { EmailService } from '../../../core/services/email.service';
 import { User } from '../../models/user.model';
 import { UserRole } from '../../interfaces/role.interface';
+import { Schedule, TimeSlot } from '../../interfaces/advisory.interface';
 
 @Component({
   selector: 'app-advisory-modal',
@@ -24,17 +27,19 @@ export class AdvisoryModalComponent implements OnInit {
   errorMessage = '';
   currentUser: any = null;
 
-  // Horarios disponibles (esto se podría mejorar con el servicio de Schedule)
-  availableTimes = [
-    '09:00', '10:00', '11:00', '12:00',
-    '14:00', '15:00', '16:00', '17:00', '18:00'
-  ];
+  // Sistema dinámico de horarios
+  availableDates: Date[] = [];
+  availableTimeSlots: TimeSlot[] = [];
+  programmerSchedules: Schedule[] = [];
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private userService: UserService,
-    private advisoryService: AdvisoryService
+    private advisoryService: AdvisoryService,
+    private scheduleService: ScheduleService,
+    private emailService: EmailService,
+    private cdr: ChangeDetectorRef
   ) {
     this.advisoryForm = this.fb.group({
       programmerId: ['', Validators.required],
@@ -47,9 +52,24 @@ export class AdvisoryModalComponent implements OnInit {
   ngOnInit(): void {
     this.authService.user$.subscribe(user => {
       this.currentUser = user;
+      this.cdr.detectChanges();
     });
 
     this.loadProgrammers();
+
+    // Escuchar cambios en programmerId para cargar horarios
+    this.advisoryForm.get('programmerId')?.valueChanges.subscribe(programmerId => {
+      if (programmerId) {
+        this.loadProgrammerSchedules(programmerId);
+      }
+    });
+
+    // Escuchar cambios en date para cargar slots de tiempo
+    this.advisoryForm.get('date')?.valueChanges.subscribe(date => {
+      if (date) {
+        this.loadAvailableTimeSlots(date);
+      }
+    });
   }
 
   loadProgrammers(): void {
@@ -59,11 +79,131 @@ export class AdvisoryModalComponent implements OnInit {
         console.log('✅ AdvisoryModal: Programadores recibidos:', programmers);
         this.programmers = programmers;
         console.log('✅ AdvisoryModal: this.programmers actualizado:', this.programmers);
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('❌ AdvisoryModal: Error al cargar programadores:', error);
         this.programmers = [];
+        this.cdr.detectChanges();
       }
+    });
+  }
+
+  loadProgrammerSchedules(programmerId: string): void {
+    console.log('🔍 Cargando horarios del programador:', programmerId);
+    this.scheduleService.getSchedulesByProgrammer(programmerId).subscribe({
+      next: (schedules) => {
+        // Filtrar solo horarios activos y futuros
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        this.programmerSchedules = schedules.filter(schedule => {
+          if (!schedule.isActive) return false;
+
+          const scheduleDate = this.convertToDate(schedule.date);
+          return scheduleDate >= today;
+        });
+
+        console.log('✅ Horarios del programador cargados:', this.programmerSchedules);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('❌ Error cargando horarios:', error);
+        this.programmerSchedules = [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  async loadAvailableTimeSlots(selectedDate: string): Promise<void> {
+    const programmerId = this.advisoryForm.get('programmerId')?.value;
+    if (!programmerId) return;
+
+    // Encontrar el horario para la fecha seleccionada
+    const selectedDateObj = new Date(selectedDate);
+    const schedule = this.programmerSchedules.find(s => {
+      const schedDate = this.convertToDate(s.date);
+      return this.isSameDate(schedDate, selectedDateObj);
+    });
+
+    if (!schedule) {
+      this.availableTimeSlots = [];
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // Generar slots de tiempo basados en startTime y endTime
+    const slots = this.generateTimeSlots(schedule.startTime, schedule.endTime);
+
+    // Verificar qué slots ya están reservados
+    this.advisoryService.getAdvisoriesByProgrammer(programmerId).subscribe({
+      next: async (advisories) => {
+        const reserved = advisories.filter(adv => {
+          const advDate = this.convertToDate(adv.date);
+          return this.isSameDate(advDate, selectedDateObj) &&
+                 (adv.status === 'pending' || adv.status === 'approved');
+        });
+
+        const reservedTimes = reserved.map(adv => adv.time);
+
+        this.availableTimeSlots = slots.map(time => ({
+          time,
+          available: !reservedTimes.includes(time)
+        }));
+
+        console.log('✅ Slots de tiempo generados:', this.availableTimeSlots);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('❌ Error verificando disponibilidad:', error);
+        this.availableTimeSlots = slots.map(time => ({ time, available: true }));
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  generateTimeSlots(startTime: string, endTime: string): string[] {
+    const slots: string[] = [];
+    const [startHour] = startTime.split(':').map(Number);
+    const [endHour] = endTime.split(':').map(Number);
+
+    for (let hour = startHour; hour < endHour; hour++) {
+      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+    }
+
+    return slots;
+  }
+
+  convertToDate(date: any): Date {
+    if (date.toDate && typeof date.toDate === 'function') {
+      return date.toDate();
+    } else if (date instanceof Date) {
+      return date;
+    } else {
+      return new Date(date);
+    }
+  }
+
+  isSameDate(date1: Date, date2: Date): boolean {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+  }
+
+  getAvailableDates(): string[] {
+    return this.programmerSchedules.map(schedule => {
+      const date = this.convertToDate(schedule.date);
+      return date.toISOString().split('T')[0];
+    });
+  }
+
+  formatScheduleDate(date: any): string {
+    const dateObj = this.convertToDate(date);
+    return dateObj.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   }
 
@@ -82,7 +222,9 @@ export class AdvisoryModalComponent implements OnInit {
         }
 
         const userData = this.authService.getCurrentUserData();
+        const advisoryDate = new Date(formValue.date);
 
+        // 1. Crear la asesoría en Firestore
         await this.advisoryService.createAdvisory(
           this.currentUser.uid,
           userData?.displayName || this.currentUser.displayName || 'Usuario',
@@ -90,11 +232,25 @@ export class AdvisoryModalComponent implements OnInit {
           selectedProgrammer.displayName || 'Programador',
           {
             programmerId: formValue.programmerId,
-            date: new Date(formValue.date),
+            date: advisoryDate,
             time: formValue.time,
             comment: formValue.comment
           }
         );
+
+        // 2. Enviar email al programador (sin bloquear el proceso)
+        this.emailService.sendAdvisoryRequestToProgrammer({
+          programmerName: selectedProgrammer.displayName || 'Programador',
+          programmerEmail: selectedProgrammer.email || '',
+          userName: userData?.displayName || this.currentUser.displayName || 'Usuario',
+          userEmail: this.currentUser.email!,
+          date: advisoryDate,
+          time: formValue.time,
+          comment: formValue.comment || ''
+        }).catch(error => {
+          // No bloqueamos el proceso si falla el email
+          console.error('❌ Error al enviar email (no crítico):', error);
+        });
 
         this.successMessage = '¡Solicitud de asesoría enviada exitosamente!';
         setTimeout(() => {

@@ -29,12 +29,19 @@ export interface Schedule {
   id?: string;
   programmerId: string;        // UID del programador
   programmerName: string;
-  dayOfWeek: number;           // 0=Domingo, 1=Lunes, ..., 6=Sábado
+  date: Date | any;            // Fecha específica del horario
   startTime: string;           // Hora inicio (ej: "09:00")
   endTime: string;             // Hora fin (ej: "18:00")
   isActive: boolean;           // Si está activo o no
   createdAt?: Date | any;
   updatedAt?: Date | any;
+}
+
+// Slot de tiempo individual dentro de un horario
+export interface TimeSlot {
+  time: string;                // Hora del slot (ej: "09:00", "10:00")
+  available: boolean;          // Si está disponible o ya reservado
+  advisoryId?: string;         // ID de la asesoría si está reservado
 }
 
 // Datos para crear una nueva solicitud de asesoría

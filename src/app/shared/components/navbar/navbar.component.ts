@@ -28,6 +28,7 @@ export class NavbarComponent implements OnInit, OnDestroy, OnChanges {
   @Input() showDashboardLink: boolean = false;
   @Input() additionalMenuItems: NavMenuItem[] = [];
   @Input() customNavLinks: NavLink[] = [];
+  @Input() hideNavLinks: boolean = false; // Para ocultar los enlaces de navegación en dashboards
   @Output() logoutEvent = new EventEmitter<void>();
   @Output() scrollToEvent = new EventEmitter<string>();
 

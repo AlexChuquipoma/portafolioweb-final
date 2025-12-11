@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -35,28 +35,19 @@ export class AdminDashboardComponent implements OnInit {
   showScheduleModal = false;
   selectedProgrammerId = '';
   newSchedule = {
-    dayOfWeek: 1,
+    date: new Date(),
     startTime: '09:00',
     endTime: '17:00',
     isActive: true
   };
-
-  daysOfWeek = [
-    { value: 0, label: 'Domingo' },
-    { value: 1, label: 'Lunes' },
-    { value: 2, label: 'Martes' },
-    { value: 3, label: 'Miércoles' },
-    { value: 4, label: 'Jueves' },
-    { value: 5, label: 'Viernes' },
-    { value: 6, label: 'Sábado' }
-  ];
 
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private scheduleService: ScheduleService,
     private advisoryService: AdvisoryService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -65,6 +56,8 @@ export class AdminDashboardComponent implements OnInit {
       if (user) {
         this.initializeNavMenu();
       }
+      // Forzar detección de cambios después de actualizar currentUser
+      this.cdr.detectChanges();
     });
 
     await this.loadUsers();
@@ -75,19 +68,9 @@ export class AdminDashboardComponent implements OnInit {
   initializeNavMenu(): void {
     this.navMenuItems = [
       {
-        label: 'Ver Portafolio',
-        icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>',
-        action: () => this.goToPortfolio()
-      },
-      {
-        label: 'Gestionar Usuarios',
-        icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>',
-        action: () => this.scrollToSection('users')
-      },
-      {
-        label: 'Ver Horarios',
-        icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>',
-        action: () => this.scrollToSection('schedules')
+        label: 'Mi Perfil',
+        icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>',
+        action: () => this.router.navigate(['/profile'])
       }
     ];
   }
@@ -112,15 +95,18 @@ export class AdminDashboardComponent implements OnInit {
           });
           console.log('🔍 Admin: Programadores filtrados:', this.programmers);
           this.loading = false;
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error cargando usuarios:', error);
           this.loading = false;
+          this.cdr.detectChanges();
         }
       });
     } catch (error) {
       console.error('Error cargando usuarios:', error);
       this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -190,10 +176,12 @@ export class AdminDashboardComponent implements OnInit {
         console.log('🔍 Admin: Horarios recibidos:', schedules);
         this.allSchedules = schedules;
         this.loadingSchedules = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error cargando horarios:', error);
         this.loadingSchedules = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -205,10 +193,12 @@ export class AdminDashboardComponent implements OnInit {
         console.log('🔍 Admin: Asesorías recibidas:', advisories);
         this.allAdvisories = advisories;
         this.loadingAdvisories = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error cargando asesorías:', error);
         this.loadingAdvisories = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -227,7 +217,7 @@ export class AdminDashboardComponent implements OnInit {
 
   resetScheduleForm(): void {
     this.newSchedule = {
-      dayOfWeek: 1,
+      date: new Date(),
       startTime: '09:00',
       endTime: '17:00',
       isActive: true
@@ -246,7 +236,7 @@ export class AdminDashboardComponent implements OnInit {
       const scheduleData: Omit<Schedule, 'id'> = {
         programmerId: this.selectedProgrammerId,
         programmerName: programmerName,
-        dayOfWeek: this.newSchedule.dayOfWeek,
+        date: this.newSchedule.date,
         startTime: this.newSchedule.startTime,
         endTime: this.newSchedule.endTime,
         isActive: this.newSchedule.isActive
@@ -294,8 +284,44 @@ export class AdminDashboardComponent implements OnInit {
     return programmer?.displayName || programmer?.email || 'Desconocido';
   }
 
-  getDayName(dayOfWeek: number): string {
-    const day = this.daysOfWeek.find(d => d.value === dayOfWeek);
-    return day?.label || '';
+  formatDate(date: any): string {
+    if (!date) return '';
+
+    let dateObj: Date;
+    if (date.toDate && typeof date.toDate === 'function') {
+      dateObj = date.toDate();
+    } else if (date instanceof Date) {
+      dateObj = date;
+    } else {
+      dateObj = new Date(date);
+    }
+
+    return dateObj.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  formatDateShort(date: any): string {
+    if (!date) return '';
+
+    let dateObj: Date;
+    if (date.toDate && typeof date.toDate === 'function') {
+      dateObj = date.toDate();
+    } else if (date instanceof Date) {
+      dateObj = date;
+    } else {
+      dateObj = new Date(date);
+    }
+
+    return dateObj.toLocaleDateString('es-ES');
+  }
+
+  getCurrentDate(): string {
+    // Retorna la fecha actual en formato YYYY-MM-DD para el input type="date"
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   }
 }

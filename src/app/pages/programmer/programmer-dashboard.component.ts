@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { ProjectService } from '../../core/services/project.service';
 import { AdvisoryService } from '../../core/services/advisory.service';
+import { EmailService } from '../../core/services/email.service';
 import { Project, ProjectType, ParticipationType } from '../../shared/interfaces/project.interface';
 import { Advisory, AdvisoryStatus } from '../../shared/interfaces/advisory.interface';
 import { NavbarComponent, NavMenuItem } from '../../shared/components/navbar/navbar.component';
@@ -55,7 +56,9 @@ export class ProgrammerDashboardComponent implements OnInit {
     private authService: AuthService,
     private projectService: ProjectService,
     private advisoryService: AdvisoryService,
-    private router: Router
+    private emailService: EmailService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -66,20 +69,17 @@ export class ProgrammerDashboardComponent implements OnInit {
         this.loadProjects();
         this.loadAdvisories();
       }
+      // Forzar detección de cambios después de actualizar currentUser
+      this.cdr.detectChanges();
     });
   }
 
   initializeNavMenu(): void {
     this.navMenuItems = [
       {
-        label: 'Ver mi Portafolio',
-        icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>',
-        action: () => this.goToMyPortfolio()
-      },
-      {
-        label: 'Nuevo Proyecto',
-        icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>',
-        action: () => this.openAddProjectModal()
+        label: 'Mi Perfil',
+        icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>',
+        action: () => this.router.navigate(['/profile'])
       }
     ];
   }
@@ -93,6 +93,7 @@ export class ProgrammerDashboardComponent implements OnInit {
       this.academicProjects = projects.filter(p => p.type === ProjectType.ACADEMIC);
       this.professionalProjects = projects.filter(p => p.type === ProjectType.PROFESSIONAL);
       this.loading = false;
+      this.cdr.detectChanges();
     });
   }
 
@@ -217,6 +218,7 @@ export class ProgrammerDashboardComponent implements OnInit {
       this.advisories = advisories;
       this.pendingAdvisories = advisories.filter(a => a.status === AdvisoryStatus.PENDING);
       this.loadingAdvisories = false;
+      this.cdr.detectChanges();
     });
   }
 
@@ -231,13 +233,28 @@ export class ProgrammerDashboardComponent implements OnInit {
   }
 
   async approveAdvisory(): Promise<void> {
-    if (!this.selectedAdvisory) return;
+    if (!this.selectedAdvisory || !this.currentUser) return;
 
     try {
+      // 1. Aprobar en Firestore
       await this.advisoryService.approveAdvisory(
         this.selectedAdvisory.id!,
         this.responseMessage || 'Asesoría aprobada'
       );
+
+      // 2. Enviar email al usuario (sin bloquear el proceso)
+      this.emailService.sendAdvisoryResponseToUser({
+        userName: this.selectedAdvisory.userName,
+        userEmail: this.selectedAdvisory.userEmail,
+        programmerName: this.currentUser.displayName || 'Programador',
+        programmerEmail: this.currentUser.email || '',
+        date: this.convertToDate(this.selectedAdvisory.date),
+        time: this.selectedAdvisory.time,
+        status: 'approved'
+      }).catch(error => {
+        console.error('❌ Error al enviar email (no crítico):', error);
+      });
+
       alert('Asesoría aprobada exitosamente');
       this.closeAdvisoryDetail();
       this.loadAdvisories();
@@ -247,8 +264,19 @@ export class ProgrammerDashboardComponent implements OnInit {
     }
   }
 
+  // Helper para convertir fecha de Firestore
+  private convertToDate(date: any): Date {
+    if (date.toDate && typeof date.toDate === 'function') {
+      return date.toDate();
+    } else if (date instanceof Date) {
+      return date;
+    } else {
+      return new Date(date);
+    }
+  }
+
   async rejectAdvisory(): Promise<void> {
-    if (!this.selectedAdvisory) return;
+    if (!this.selectedAdvisory || !this.currentUser) return;
 
     if (!this.responseMessage.trim()) {
       alert('Por favor ingresa un motivo para rechazar la asesoría');
@@ -256,7 +284,23 @@ export class ProgrammerDashboardComponent implements OnInit {
     }
 
     try {
+      // 1. Rechazar en Firestore
       await this.advisoryService.rejectAdvisory(this.selectedAdvisory.id!, this.responseMessage);
+
+      // 2. Enviar email al usuario (sin bloquear el proceso)
+      this.emailService.sendAdvisoryResponseToUser({
+        userName: this.selectedAdvisory.userName,
+        userEmail: this.selectedAdvisory.userEmail,
+        programmerName: this.currentUser.displayName || 'Programador',
+        programmerEmail: this.currentUser.email || '',
+        date: this.convertToDate(this.selectedAdvisory.date),
+        time: this.selectedAdvisory.time,
+        status: 'rejected',
+        rejectionReason: this.responseMessage
+      }).catch(error => {
+        console.error('❌ Error al enviar email (no crítico):', error);
+      });
+
       alert('Asesoría rechazada');
       this.closeAdvisoryDetail();
       this.loadAdvisories();

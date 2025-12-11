@@ -33,7 +33,7 @@ export class PortfolioJuanComponent implements OnInit {
 
   // Enlaces personalizados para el navbar
   customNavLinks: NavLink[] = [
-    { label: 'Inicio', sectionId: 'home' },
+    { label: 'Sobre mi', sectionId: 'home' },
     { label: 'Mis Proyectos', sectionId: 'projects' },
     { label: 'Habilidades', sectionId: 'skills' },
     { label: 'Contacto', sectionId: 'contact' }
@@ -53,8 +53,8 @@ export class PortfolioJuanComponent implements OnInit {
 >>>>>>> 33fe33bf647b6340ec60b465e87b8af12983b7b9
     description: 'Tengo experiencia en el desarrollo front-end y back-end, utilizando tecnologías como Angular, Node.js y bases de datos NoSQL.',
     email: 'juan@example.com',
-    github: 'https://github.com/Juan0Fernandez', 
-    linkedin: 'https://www.linkedin.com/in/juan-fernandez-17/' 
+    github: 'https://github.com/juan',
+    linkedin: 'https://linkedin.com/in/juan'
   };
 
   projects: Project[] = [
@@ -64,13 +64,13 @@ export class PortfolioJuanComponent implements OnInit {
       description: 'Formularios simple y dinamico.',
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500',
       technologies: ['Angular', 'D3.js', 'Node.js', 'Chart.js'],
-      link: 'https://juan0fernandez.github.io/Programaci-n-y-Plataformas-Web-Clases/',
-      github: 'https://github.com/Juan0Fernandez/Programaci-n-y-Plataformas-Web-Clases'
+      link: '#',
+      github: '#'
     },
     {
       id: 2,
-      title: 'Heuristicas web',
-      description: 'Plataforma con una interfaz centrada  con una segunda parte con contenido de heuristicas.',
+      title: 'Blog Platform',
+      description: 'Plataforma de blogs con editor markdown, categorías y sistema de comentarios.',
       image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=500',
       technologies: ['Next.js', 'TypeScript', 'Prisma', 'Tailwind'],
       link: 'https://juan0fernandez.github.io/02-ui-components/',
@@ -78,8 +78,8 @@ export class PortfolioJuanComponent implements OnInit {
     },
     {
       id: 3,
-      title: 'Simpson page',
-      description: 'Aplicación web que muestra información de personajes de Los Simpson utilizando una API pública.',
+      title: 'Weather App',
+      description: 'Aplicación del clima con pronóstico de 7 días, mapas interactivos y alertas meteorológicas.',
       image: 'https://images.unsplash.com/photo-1592210454359-9043f067919b?w=500',
       technologies: ['React', 'OpenWeather API', 'Mapbox', 'Redux'],
       link: 'https://juan0fernandez.github.io/icc-ppw-03-ui-fundamentos/',

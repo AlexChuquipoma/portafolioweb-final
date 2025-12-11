@@ -33,7 +33,7 @@ export class PortfolioAlexanderComponent implements OnInit {
 
   // Enlaces personalizados para el navbar
   customNavLinks: NavLink[] = [
-    { label: 'Inicio', sectionId: 'home' },
+    { label: 'Sobre mi', sectionId: 'home' },
     { label: 'Mis Proyectos', sectionId: 'projects' },
     { label: 'Habilidades', sectionId: 'skills' },
     { label: 'Contacto', sectionId: 'contact' }
@@ -47,9 +47,10 @@ export class PortfolioAlexanderComponent implements OnInit {
     image: '/imagenes/alex.png',
     bio: 'Soy Alexander Chuquipoma, un desarrollador web apasionado por crear soluciones innovadoras y eficientes.',
     description: 'He trabajado con Angular, Firebase y arquitecturas modernas basadas en microservicios.',
-    email: 'alexander@example.com',
+    email: 'achuquipoma@est.ups.edu.ec',
     github: 'https://github.com/AlexChuquipoma',
-    linkedin: 'https://www.linkedin.com/in/alexander-chuquipoma-a62686220/'
+    linkedin: 'https://www.linkedin.com/in/alexander-chuquipoma-a62686220/',
+    whatsapp: '593983592464'
   };
 
   projects: Project[] = [
