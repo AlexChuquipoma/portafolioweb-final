@@ -3,12 +3,14 @@ import { Firestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, query
 import { Observable, from, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Advisory, AdvisoryStatus, AdvisoryRequest } from '../../shared/interfaces/advisory.interface';
+import { NotificationService } from './notification.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdvisoryService {
   private firestore: Firestore = inject(Firestore);
+  private notificationService: NotificationService = inject(NotificationService);
 
   constructor() {}
 
@@ -16,6 +18,11 @@ export class AdvisoryService {
    * Crear nueva solicitud de asesoría
    */
   async createAdvisory(userId: string, userName: string, userEmail: string, programmerName: string, request: AdvisoryRequest): Promise<string> {
+    // Convertir la fecha a string para Firestore
+    const dateString = request.date instanceof Date
+      ? request.date.toISOString().split('T')[0]
+      : request.date;
+
     const data: Omit<Advisory, 'id'> = {
       userId,
       userName,
@@ -32,6 +39,18 @@ export class AdvisoryService {
 
     const advisoriesRef = collection(this.firestore, 'advisories');
     const docRef = await addDoc(advisoriesRef, data);
+
+    // Crear notificación para el programador (usando dateString)
+    await this.notificationService.notifyAdvisoryRequested(
+      request.programmerId,
+      programmerName,
+      userName,
+      userEmail,
+      docRef.id,
+      dateString,
+      request.time
+    );
+
     return docRef.id;
   }
 
@@ -106,35 +125,96 @@ export class AdvisoryService {
    * Aprobar asesoría
    */
   async approveAdvisory(advisoryId: string, message?: string): Promise<void> {
+    // Obtener datos de la asesoría antes de actualizar
+    const advisory = await this.getAdvisoryById(advisoryId);
+    if (!advisory) {
+      throw new Error('Asesoría no encontrada');
+    }
+
     const advisoryDoc = doc(this.firestore, 'advisories', advisoryId);
     await updateDoc(advisoryDoc, {
       status: AdvisoryStatus.APPROVED,
       responseMessage: message || 'Asesoría aprobada',
       updatedAt: serverTimestamp()
     });
+
+    // Convertir fecha a string
+    const dateString = this.convertToDateString(advisory.date);
+
+    // Crear notificación para el usuario
+    await this.notificationService.notifyAdvisoryApproved(
+      advisory.userId,
+      advisory.userName,
+      advisory.programmerName,
+      advisory.programmerId,
+      advisoryId,
+      dateString,
+      advisory.time,
+      message
+    );
   }
 
   /**
    * Rechazar asesoría
    */
   async rejectAdvisory(advisoryId: string, message: string): Promise<void> {
+    // Obtener datos de la asesoría antes de actualizar
+    const advisory = await this.getAdvisoryById(advisoryId);
+    if (!advisory) {
+      throw new Error('Asesoría no encontrada');
+    }
+
     const advisoryDoc = doc(this.firestore, 'advisories', advisoryId);
     await updateDoc(advisoryDoc, {
       status: AdvisoryStatus.REJECTED,
       responseMessage: message,
       updatedAt: serverTimestamp()
     });
+
+    // Convertir fecha a string
+    const dateString = this.convertToDateString(advisory.date);
+
+    // Crear notificación para el usuario
+    await this.notificationService.notifyAdvisoryRejected(
+      advisory.userId,
+      advisory.userName,
+      advisory.programmerName,
+      advisory.programmerId,
+      advisoryId,
+      dateString,
+      advisory.time,
+      message
+    );
   }
 
   /**
    * Marcar asesoría como completada
    */
   async completeAdvisory(advisoryId: string): Promise<void> {
+    // Obtener datos de la asesoría antes de actualizar
+    const advisory = await this.getAdvisoryById(advisoryId);
+    if (!advisory) {
+      throw new Error('Asesoría no encontrada');
+    }
+
     const advisoryDoc = doc(this.firestore, 'advisories', advisoryId);
     await updateDoc(advisoryDoc, {
       status: AdvisoryStatus.COMPLETED,
       updatedAt: serverTimestamp()
     });
+
+    // Convertir fecha a string
+    const dateString = this.convertToDateString(advisory.date);
+
+    // Crear notificación para el usuario
+    await this.notificationService.notifyAdvisoryCompleted(
+      advisory.userId,
+      advisory.userName,
+      advisory.programmerName,
+      advisoryId,
+      dateString,
+      advisory.time
+    );
   }
 
   /**
@@ -178,5 +258,22 @@ export class AdvisoryService {
         return of([]);
       })
     );
+  }
+
+  /**
+   * Método auxiliar para convertir fecha a string
+   */
+  private convertToDateString(date: any): string {
+    if (typeof date === 'string') {
+      return date;
+    }
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0];
+    }
+    if (date?.toDate && typeof date.toDate === 'function') {
+      // Firestore Timestamp
+      return date.toDate().toISOString().split('T')[0];
+    }
+    return String(date);
   }
 }

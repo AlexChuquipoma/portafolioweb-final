@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { NavbarComponent, NavLink } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 
 interface Project {
@@ -31,12 +31,20 @@ interface Skill {
 export class PortfolioJuanComponent implements OnInit {
   currentUser: any = null;
 
+  // Enlaces personalizados para el navbar
+  customNavLinks: NavLink[] = [
+    { label: 'Inicio', sectionId: 'home' },
+    { label: 'Mis Proyectos', sectionId: 'projects' },
+    { label: 'Habilidades', sectionId: 'skills' },
+    { label: 'Contacto', sectionId: 'contact' }
+  ];
+
   // Información personal de Juan
   developer = {
     name: 'Juan Fernández',
     greeting: '¡Holaa!',
     title: 'Desarrollador Web Front-End & Back-End',
-    image: '/imagenes/juan.webp',
+    image: '/imagenes/juan.png',
     bio: 'Soy Juan Fernández, un desarrollador web dedicado a construir aplicaciones web atractivas y funcionales.',
     description: 'Tengo experiencia en el desarrollo front-end y back-end, utilizando tecnologías como Angular, Node.js y bases de datos NoSQL.',
     email: 'juan@example.com',

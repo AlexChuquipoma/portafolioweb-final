@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { NavbarComponent, NavLink } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 
 interface Project {
@@ -30,6 +30,14 @@ interface Skill {
 })
 export class PortfolioAlexanderComponent implements OnInit {
   currentUser: any = null;
+
+  // Enlaces personalizados para el navbar
+  customNavLinks: NavLink[] = [
+    { label: 'Inicio', sectionId: 'home' },
+    { label: 'Mis Proyectos', sectionId: 'projects' },
+    { label: 'Habilidades', sectionId: 'skills' },
+    { label: 'Contacto', sectionId: 'contact' }
+  ];
 
   // Información personal de Alexander
   developer = {
