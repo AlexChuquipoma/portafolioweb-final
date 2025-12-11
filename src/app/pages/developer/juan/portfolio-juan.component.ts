@@ -36,41 +36,41 @@ export class PortfolioJuanComponent implements OnInit {
     name: 'Juan Fernández',
     greeting: '¡Holaa!',
     title: 'Desarrollador Web Front-End & Back-End',
-    image: '/imagenes/juan.webp',
-    bio: 'Soy Juan Fernández, un desarrollador web dedicado a construir aplicaciones web atractivas y funcionales.',
+    image: '/imagenes/juanperfil.jpg',
+    bio: 'Soy Juan Fernández, un desarrollador ewqeweb dedicado a construir aplicaciones web atractivas y funcionales.',
     description: 'Tengo experiencia en el desarrollo front-end y back-end, utilizando tecnologías como Angular, Node.js y bases de datos NoSQL.',
     email: 'juan@example.com',
-    github: 'https://github.com/juan',
-    linkedin: 'https://linkedin.com/in/juan'
+    github: 'https://github.com/Juan0Fernandez', 
+    linkedin: 'https://www.linkedin.com/in/juan-fernandez-17/' 
   };
 
   projects: Project[] = [
     {
       id: 1,
-      title: 'Dashboard Analytics',
-      description: 'Dashboard interactivo con visualización de datos en tiempo real y reportes personalizados.',
+      title: 'Proyecto Angular Dashboard',
+      description: 'Formularios simple y dinamico.',
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500',
       technologies: ['Angular', 'D3.js', 'Node.js', 'Chart.js'],
-      link: '#',
-      github: '#'
+      link: 'https://juan0fernandez.github.io/Programaci-n-y-Plataformas-Web-Clases/',
+      github: 'https://github.com/Juan0Fernandez/Programaci-n-y-Plataformas-Web-Clases'
     },
     {
       id: 2,
-      title: 'Blog Platform',
-      description: 'Plataforma de blogs con editor markdown, categorías y sistema de comentarios.',
+      title: 'Heuristicas web',
+      description: 'Plataforma con una interfaz centrada  con una segunda parte con contenido de heuristicas.',
       image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=500',
       technologies: ['Next.js', 'TypeScript', 'Prisma', 'Tailwind'],
-      link: '#',
-      github: '#'
+      link: 'https://juan0fernandez.github.io/02-ui-components/',
+      github: 'https://github.com/Juan0Fernandez/icc-ppw-03-ui-fundamentos.git'
     },
     {
       id: 3,
-      title: 'Weather App',
-      description: 'Aplicación del clima con pronóstico de 7 días, mapas interactivos y alertas meteorológicas.',
+      title: 'Simpson page',
+      description: 'Aplicación web que muestra información de personajes de Los Simpson utilizando una API pública.',
       image: 'https://images.unsplash.com/photo-1592210454359-9043f067919b?w=500',
       technologies: ['React', 'OpenWeather API', 'Mapbox', 'Redux'],
-      link: '#',
-      github: '#'
+      link: 'https://juan0fernandez.github.io/icc-ppw-03-ui-fundamentos/',
+      github: 'https://github.com/Juan0Fernandez/icc-ppw-03-ui-fundamentos.git'
     }
   ];
 

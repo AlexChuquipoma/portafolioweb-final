@@ -53,12 +53,12 @@ export class PortfolioComponent implements OnInit {
     {
       id: 2,
       name: 'Juan Fernández',
-      image: '/imagenes/juan.webp',
+      image: '/imagenes/juanperfil.jpg',
       greeting: '¡Holaa!',
       description: 'Soy Juan Fernández, un desarrollador web dedicado a construir aplicaciones web atractivas y funcionales.',
       bio: 'Tengo experiencia en el desarrollo front-end y back-end, utilizando tecnologías como Angular, Node.js y bases de datos NoSQL.',
-      github: '#',
-      linkedin: '#'
+      github: 'https://github.com/Juan0Fernandez',
+      linkedin: 'https://www.linkedin.com/in/juan-fernandez-074a3734b/'
     }
   ];
 
