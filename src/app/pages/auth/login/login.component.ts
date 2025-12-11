@@ -32,17 +32,17 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.errorMessage = '';
-      
+
       const { email, password } = this.loginForm.value;
-      
+
       const result = await this.authService.login(email, password);
-      
+
       if (result.success) {
-        this.router.navigate(['/portfolio']);
+        await this.redirectBasedOnRole();
       } else {
         this.errorMessage = result.message;
       }
-      
+
       this.isLoading = false;
     }
   }
@@ -50,16 +50,34 @@ export class LoginComponent {
   async loginWithGoogle(): Promise<void> {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     const result = await this.authService.loginWithGoogle();
-    
+
     if (result.success) {
-      this.router.navigate(['/portfolio']);
+      await this.redirectBasedOnRole();
     } else {
       this.errorMessage = result.message;
     }
-    
+
     this.isLoading = false;
+  }
+
+  /**
+   * Redirigir según el rol del usuario
+   */
+  private async redirectBasedOnRole(): Promise<void> {
+    // Esperar un momento para que se actualice el currentUserData
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const role = await this.authService.getCurrentUserRole();
+
+    if (role === 'admin') {
+      this.router.navigate(['/admin']);
+    } else if (role === 'programmer') {
+      this.router.navigate(['/programmer']);
+    } else {
+      this.router.navigate(['/portfolio']);
+    }
   }
 
   togglePasswordVisibility(): void {

@@ -12,11 +12,44 @@
         <a (click)="scrollToSection('skills')" class="text-gray-300 hover:text-purple-400 cursor-pointer transition font-medium">Habilidades</a>
         <a (click)="scrollToSection('contact')" class="text-gray-300 hover:text-purple-400 cursor-pointer transition font-medium">Contacto</a>
 
-        <div *ngIf="currentUser; else loginButton" class="flex items-center space-x-4">
-          <span class="text-gray-300">Hola, {{ currentUser.name }}</span>
-          <button (click)="logout()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition">
-            Salir
+        <!-- User Menu Dropdown -->
+        <div *ngIf="currentUser; else loginButton" class="relative user-menu-container">
+          <button (click)="toggleUserMenu()" class="flex items-center space-x-2 focus:outline-none group">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm group-hover:scale-110 transition-transform">
+              {{ getUserInitials() }}
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-purple-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
           </button>
+
+          <!-- Dropdown Menu -->
+          <div *ngIf="userMenuOpen"
+               class="absolute right-0 mt-2 w-64 bg-slate-800 rounded-lg shadow-xl border border-purple-500/20 py-2 z-50">
+            <div class="px-4 py-3 border-b border-gray-700">
+              <p class="text-white font-semibold truncate">{{ getUserDisplayName() }}</p>
+              <p class="text-gray-400 text-sm truncate">{{ getUserEmail() }}</p>
+            </div>
+
+            <!-- Additional Menu Items -->
+            <div *ngFor="let item of additionalMenuItems">
+              <button (click)="item.action(); closeUserMenu()"
+                      class="w-full text-left px-4 py-2 text-gray-300 hover:bg-slate-700 hover:text-white transition flex items-center space-x-2">
+                <span [innerHTML]="item.icon" class="w-5 h-5"></span>
+                <span>{{ item.label }}</span>
+              </button>
+            </div>
+
+            <div *ngIf="additionalMenuItems.length > 0" class="border-t border-gray-700 my-1"></div>
+
+            <button (click)="logout()"
+                    class="w-full text-left px-4 py-2 text-red-400 hover:bg-slate-700 transition flex items-center space-x-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+              <span>Cerrar Sesión</span>
+            </button>
+          </div>
         </div>
         <ng-template #loginButton>
           <a [routerLink]="['/login']" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-md hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105">
@@ -45,11 +78,25 @@
       <a (click)="scrollToSection('skills')" class="block px-3 py-2 text-gray-300 hover:text-purple-400 hover:bg-slate-800 rounded-md cursor-pointer transition">Habilidades</a>
       <a (click)="scrollToSection('contact')" class="block px-3 py-2 text-gray-300 hover:text-purple-400 hover:bg-slate-800 rounded-md cursor-pointer transition">Contacto</a>
 
+      <!-- Mobile User Menu -->
       <div *ngIf="currentUser; else mobileLogin" class="px-3 py-2">
-        <span class="block text-gray-300 mb-2">Hola, {{ currentUser.name }}</span>
-        <button (click)="logout()" class="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">
-          Salir
-        </button>
+        <div class="bg-slate-800/50 rounded-lg p-4 mb-2">
+          <div class="flex items-center space-x-3 mb-3">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+              {{ getUserInitials() }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-white font-semibold truncate">{{ getUserDisplayName() }}</p>
+              <p class="text-gray-400 text-sm truncate">{{ getUserEmail() }}</p>
+            </div>
+          </div>
+          <button (click)="logout()" class="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 flex items-center justify-center space-x-2 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
       </div>
       <ng-template #mobileLogin>
         <div class="px-3 py-2">
