@@ -4,27 +4,23 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NavbarComponent, NavLink } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
-
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  technologies: string[];
-  link: string;
-  github?: string;
-}
-
-interface Skill {
-  name: string;
-  level: number;
-  icon: string;
-}
+import { HeroSectionComponent, DeveloperInfo } from '../../../shared/components/developer/hero-section/hero-section';
+import { ProjectsSection, ProjectInfo } from '../../../shared/components/developer/projects-section/projects-section';
+import { SkillsSection, SkillInfo } from '../../../shared/components/developer/skills-section/skills-section';
+import { ContactSection } from '../../../shared/components/developer/contact-section/contact-section';
 
 @Component({
   selector: 'app-portfolio-alexander',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, FooterComponent],
+  imports: [
+    CommonModule,
+    NavbarComponent,
+    FooterComponent,
+    HeroSectionComponent,
+    ProjectsSection,
+    SkillsSection,
+    ContactSection
+  ],
   templateUrl: './portfolio-alexander.component.html',
   styleUrl: './portfolio-alexander.component.css'
 })
@@ -40,7 +36,7 @@ export class PortfolioAlexanderComponent implements OnInit {
   ];
 
   // Información personal de Alexander
-  developer = {
+  developerInfo: DeveloperInfo = {
     name: 'Alexander Chuquipoma',
     greeting: '¡Qué onda Mijo!',
     title: 'Desarrollador Web Full Stack',
@@ -53,7 +49,7 @@ export class PortfolioAlexanderComponent implements OnInit {
     whatsapp: '593983592464'
   };
 
-  projects: Project[] = [
+  projects: ProjectInfo[] = [
     {
       id: 1,
       title: 'Fundamentos Web - Unidad 1',
@@ -101,7 +97,7 @@ export class PortfolioAlexanderComponent implements OnInit {
     }
   ];
 
-  skills: Skill[] = [
+  skills: SkillInfo[] = [
     { name: 'Angular', level: 95, icon: '🅰️' },
     { name: 'TypeScript', level: 90, icon: '💙' },
     { name: 'JavaScript', level: 95, icon: '🟨' },

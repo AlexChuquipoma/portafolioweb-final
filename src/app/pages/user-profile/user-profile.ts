@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,11 +8,13 @@ import { User } from '../../shared/models/user.model';
 import { UserRole } from '../../shared/interfaces/role.interface';
 import { updateProfile, updatePassword } from '@angular/fire/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
+import { NavbarComponent, NavMenuItem } from '../../shared/components/navbar/navbar.component';
+import { FooterComponent } from '../../shared/components/footer/footer.component';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NavbarComponent, FooterComponent],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css',
 })
@@ -28,32 +30,44 @@ export class UserProfile implements OnInit {
   successMessage = '';
   errorMessage = '';
   selectedFile: File | null = null;
+  navMenuItems: NavMenuItem[] = [];
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     console.log('🔵 UserProfile ngOnInit - Inicializando...');
     this.initializeForm();
     console.log('🔵 Formulario inicializado');
 
-    // Suscribirse a los cambios del usuario
-    this.authService.user$.subscribe(user => {
-      console.log('🔵 user$ emitió:', user);
-      if (user) {
-        this.currentUser = user;
-        console.log('🔵 Usuario autenticado, cargando datos...');
-        this.loadUserData();
-      } else {
-        console.log('⚠️ No hay usuario, redirigiendo a login');
-        this.loading = false;
-        this.router.navigate(['/login']);
-      }
-    });
+    // Intentar obtener el usuario actual primero (síncrono)
+    const syncUser = this.authService.getCurrentUser();
+    console.log('🔵 Usuario síncrono:', syncUser);
+
+    if (syncUser) {
+      this.currentUser = syncUser;
+      await this.loadUserData();
+    } else {
+      // Si no hay usuario síncrono, esperar al observable
+      console.log('🔵 No hay usuario síncrono, esperando observable...');
+      this.authService.user$.subscribe(async (user) => {
+        console.log('🔵 user$ emitió:', user);
+        if (user) {
+          this.currentUser = user;
+          console.log('🔵 Usuario autenticado, cargando datos...');
+          await this.loadUserData();
+        } else {
+          console.log('⚠️ No hay usuario, redirigiendo a login');
+          this.loading = false;
+          this.router.navigate(['/login']);
+        }
+      });
+    }
   }
 
   /**
@@ -126,6 +140,8 @@ export class UserProfile implements OnInit {
     } finally {
       console.log('🔵 loadUserData - Estableciendo loading = false');
       this.loading = false;
+      // Forzar detección de cambios
+      this.cdr.detectChanges();
     }
   }
 
@@ -243,6 +259,11 @@ export class UserProfile implements OnInit {
         await this.userService.updateUserProfile(this.currentUser.uid, {
           displayName: formValue.displayName
         });
+
+        // Actualizar también userData si existe
+        if (this.userData) {
+          this.userData.displayName = formValue.displayName;
+        }
       }
 
       // 2. Actualizar contraseña si se proporcionó
@@ -257,9 +278,6 @@ export class UserProfile implements OnInit {
         this.showPasswordChange = false;
       }
 
-      // Recargar datos
-      await this.loadUserData();
-
       this.successMessage = '¡Perfil actualizado exitosamente!';
       setTimeout(() => this.successMessage = '', 3000);
     } catch (error: any) {
@@ -273,6 +291,7 @@ export class UserProfile implements OnInit {
       }
     } finally {
       this.saving = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -324,11 +343,19 @@ export class UserProfile implements OnInit {
   goBack(): void {
     // Determinar a dónde volver según el rol
     if (this.userData?.role === UserRole.ADMIN) {
-      this.router.navigate(['/admin-dashboard']);
+      this.router.navigate(['/admin']);
     } else if (this.userData?.role === UserRole.PROGRAMMER) {
-      this.router.navigate(['/programmer-dashboard']);
+      this.router.navigate(['/programmer']);
     } else {
       this.router.navigate(['/portfolio']);
     }
+  }
+
+  /**
+   * Cerrar sesión
+   */
+  async logout(): Promise<void> {
+    await this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

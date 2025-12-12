@@ -155,11 +155,6 @@
               class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm">
               Gestionar
             </button>
-            <button *ngIf="advisory.status === AdvisoryStatus.APPROVED"
-              (click)="completeAdvisory(advisory.id!)"
-              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm">
-              Marcar como Completada
-            </button>
           </div>
         </div>
       </div>
@@ -408,7 +403,7 @@
 
       <!-- Tecnologías -->
       <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2">Tecnologías</label>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Tecnologías *</label>
         <div class="flex gap-2 mb-2">
           <input type="text" [(ngModel)]="techInput" (keyup.enter)="addTechnology()"
             class="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
@@ -429,7 +424,7 @@
 
       <!-- URL del Repositorio -->
       <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2">URL del Repositorio (GitHub, GitLab, etc.)</label>
+        <label class="block text-sm font-medium text-gray-300 mb-2">URL del Repositorio (GitHub, GitLab, etc.) *</label>
         <input type="url" [(ngModel)]="newProject.repositoryUrl"
           class="w-full px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
           placeholder="https://github.com/...">
@@ -437,7 +432,7 @@
 
       <!-- URL del Demo -->
       <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2">URL del Demo (Firebase, Vercel, etc.)</label>
+        <label class="block text-sm font-medium text-gray-300 mb-2">URL del Demo (Firebase, Vercel, etc.) *</label>
         <input type="url" [(ngModel)]="newProject.demoUrl"
           class="w-full px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
           placeholder="https://mi-proyecto.vercel.app">
@@ -445,7 +440,7 @@
 
       <!-- URL de la Imagen -->
       <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2">URL de la Imagen</label>
+        <label class="block text-sm font-medium text-gray-300 mb-2">URL de la Imagen *</label>
         <input type="url" [(ngModel)]="newProject.imageUrl"
           class="w-full px-4 py-2 bg-slate-700 text-white rounded-lg border border-white/10 focus:border-purple-500 focus:outline-none"
           placeholder="https://...">

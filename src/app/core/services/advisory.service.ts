@@ -188,36 +188,6 @@ export class AdvisoryService {
   }
 
   /**
-   * Marcar asesoría como completada
-   */
-  async completeAdvisory(advisoryId: string): Promise<void> {
-    // Obtener datos de la asesoría antes de actualizar
-    const advisory = await this.getAdvisoryById(advisoryId);
-    if (!advisory) {
-      throw new Error('Asesoría no encontrada');
-    }
-
-    const advisoryDoc = doc(this.firestore, 'advisories', advisoryId);
-    await updateDoc(advisoryDoc, {
-      status: AdvisoryStatus.COMPLETED,
-      updatedAt: serverTimestamp()
-    });
-
-    // Convertir fecha a string
-    const dateString = this.convertToDateString(advisory.date);
-
-    // Crear notificación para el usuario
-    await this.notificationService.notifyAdvisoryCompleted(
-      advisory.userId,
-      advisory.userName,
-      advisory.programmerName,
-      advisoryId,
-      dateString,
-      advisory.time
-    );
-  }
-
-  /**
    * Cancelar asesoría
    */
   async cancelAdvisory(advisoryId: string): Promise<void> {

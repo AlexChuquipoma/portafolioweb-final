@@ -247,31 +247,6 @@ export class NotificationService {
   }
 
   /**
-   * Crea una notificación cuando se completa una asesoría
-   */
-  async notifyAdvisoryCompleted(
-    userId: string,
-    userName: string,
-    programmerName: string,
-    advisoryId: string,
-    date: string,
-    time: string
-  ): Promise<void> {
-    await this.createNotification({
-      userId,
-      type: NotificationType.ADVISORY_COMPLETED,
-      title: '🎉 Asesoría Completada',
-      message: `Tu asesoría con ${programmerName} del ${date} a las ${time} ha sido marcada como completada`,
-      read: false,
-      createdAt: new Date(),
-      advisoryId,
-      relatedUserName: programmerName,
-      advisoryDate: date,
-      advisoryTime: time
-    });
-  }
-
-  /**
    * Simula el envío de notificaciones externas (Email/WhatsApp)
    */
   private async simulateExternalNotification(notification: Omit<Notification, 'id'>): Promise<void> {

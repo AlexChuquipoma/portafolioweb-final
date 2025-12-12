@@ -4,27 +4,23 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NavbarComponent, NavLink } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
-
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  technologies: string[];
-  link: string;
-  github?: string;
-}
-
-interface Skill {
-  name: string;
-  level: number;
-  icon: string;
-}
+import { HeroSectionComponent, DeveloperInfo } from '../../../shared/components/developer/hero-section/hero-section';
+import { ProjectsSection, ProjectInfo } from '../../../shared/components/developer/projects-section/projects-section';
+import { SkillsSection, SkillInfo } from '../../../shared/components/developer/skills-section/skills-section';
+import { ContactSection } from '../../../shared/components/developer/contact-section/contact-section';
 
 @Component({
   selector: 'app-portfolio-juan',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, FooterComponent],
+  imports: [
+    CommonModule,
+    NavbarComponent,
+    FooterComponent,
+    HeroSectionComponent,
+    ProjectsSection,
+    SkillsSection,
+    ContactSection
+  ],
   templateUrl: './portfolio-juan.component.html',
   styleUrl: './portfolio-juan.component.css'
 })
@@ -40,37 +36,33 @@ export class PortfolioJuanComponent implements OnInit {
   ];
 
   // Información personal de Juan
-  developer = {
+  developerInfo: DeveloperInfo = {
     name: 'Juan Fernández',
     greeting: '¡Holaa!',
     title: 'Desarrollador Web Front-End & Back-End',
-<<<<<<< HEAD
-    image: '/imagenes/juanperfil.jpg',
-    bio: 'Soy Juan Fernández, un desarrollador ewqeweb dedicado a construir aplicaciones web atractivas y funcionales.',
-=======
     image: '/imagenes/juan.png',
     bio: 'Soy Juan Fernández, un desarrollador web dedicado a construir aplicaciones web atractivas y funcionales.',
->>>>>>> 33fe33bf647b6340ec60b465e87b8af12983b7b9
     description: 'Tengo experiencia en el desarrollo front-end y back-end, utilizando tecnologías como Angular, Node.js y bases de datos NoSQL.',
     email: 'juan@example.com',
-    github: 'https://github.com/juan',
-    linkedin: 'https://linkedin.com/in/juan'
+    github: 'https://github.com/Juan0Fernandez',
+    linkedin:'https://www.linkedin.com/in/juan-fernandez-074a3734b/' ,
+    whatsapp: '593983592464'
   };
 
-  projects: Project[] = [
+  projects: ProjectInfo[] = [
     {
       id: 1,
-      title: 'Proyecto Angular Dashboard',
+      title: 'Proyecto Angular Formularios',
       description: 'Formularios simple y dinamico.',
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500',
       technologies: ['Angular', 'D3.js', 'Node.js', 'Chart.js'],
-      link: '#',
-      github: '#'
+      link: 'https://juan0fernandez.github.io/Programaci-n-y-Plataformas-Web-Clases/',
+      github: 'https://github.com/Juan0Fernandez/Programaci-n-y-Plataformas-Web-Clases'
     },
     {
       id: 2,
-      title: 'Blog Platform',
-      description: 'Plataforma de blogs con editor markdown, categorías y sistema de comentarios.',
+      title: 'Heuristicas web',
+      description: 'Plataforma con una interfaz centrada  con una segunda parte con contenido de heuristicas.',
       image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=500',
       technologies: ['Next.js', 'TypeScript', 'Prisma', 'Tailwind'],
       link: 'https://juan0fernandez.github.io/02-ui-components/',
@@ -78,8 +70,8 @@ export class PortfolioJuanComponent implements OnInit {
     },
     {
       id: 3,
-      title: 'Weather App',
-      description: 'Aplicación del clima con pronóstico de 7 días, mapas interactivos y alertas meteorológicas.',
+      title: 'Simpson page',
+      description: 'Aplicación web que muestra información de personajes de Los Simpson utilizando una API pública.',
       image: 'https://images.unsplash.com/photo-1592210454359-9043f067919b?w=500',
       technologies: ['React', 'OpenWeather API', 'Mapbox', 'Redux'],
       link: 'https://juan0fernandez.github.io/icc-ppw-03-ui-fundamentos/',
@@ -87,7 +79,7 @@ export class PortfolioJuanComponent implements OnInit {
     }
   ];
 
-  skills: Skill[] = [
+  skills: SkillInfo[] = [
     { name: 'HTML/CSS', level: 95, icon: '🎨' },
     { name: 'TypeScript', level: 88, icon: '💙' },
     { name: 'Angular', level: 85, icon: '🅰️' },
