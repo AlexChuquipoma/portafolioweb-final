@@ -118,21 +118,21 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // PROYECTOS (si los usas en el futuro)
+    // PROYECTOS
     match /projects/{projectId} {
       // Cualquiera puede leer proyectos (para mostrar en portafolios)
       allow read: if true;
 
       // Solo programadores pueden crear sus propios proyectos
       allow create: if isProgrammer() &&
-                       request.resource.data.userId == request.auth.uid;
+                       request.resource.data.programmerId == request.auth.uid;
 
       // Solo el dueño puede actualizar sus proyectos
-      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.programmerId == request.auth.uid;
 
       // Solo el dueño o admins pueden eliminar proyectos
       allow delete: if isAdmin() ||
-                       (isSignedIn() && resource.data.userId == request.auth.uid);
+                       (isSignedIn() && resource.data.programmerId == request.auth.uid);
     }
 
     // Denegar acceso a cualquier otra colección no especificada
