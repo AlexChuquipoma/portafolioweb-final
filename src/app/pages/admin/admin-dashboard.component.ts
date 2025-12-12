@@ -11,6 +11,7 @@ import { UserRole } from '../../shared/interfaces/role.interface';
 import { Schedule, Advisory } from '../../shared/interfaces/advisory.interface';
 import { NavbarComponent, NavMenuItem } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -35,7 +36,7 @@ export class AdminDashboardComponent implements OnInit {
   showScheduleModal = false;
   selectedProgrammerId = '';
   newSchedule = {
-    date: new Date(),
+    date: '',
     startTime: '09:00',
     endTime: '17:00',
     isActive: true
@@ -111,14 +112,50 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   async changeUserRole(userId: string, newRole: UserRole): Promise<void> {
+    // Confirmación antes de cambiar el rol
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: `Se cambiará el rol del usuario a ${this.getRoleDisplayName(newRole)}`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cambiar',
+      cancelButtonText: 'Cancelar',
+      background: '#7c3aed',
+      color: '#ffffff'
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
     try {
       await this.userService.assignRole(userId, newRole);
-      alert(`Rol actualizado exitosamente a ${newRole}`);
+      Swal.fire({
+        title: '¡Éxito!',
+        text: `Rol actualizado a ${this.getRoleDisplayName(newRole)}`,
+        timer: 2000,
+        background: '#7c3aed',
+        color: '#ffffff'
+      });
       await this.loadUsers();
     } catch (error) {
       console.error('Error cambiando rol:', error);
-      alert('Error al cambiar el rol');
+      Swal.fire({
+        title: 'Error',
+        text: 'No se pudo cambiar el rol',
+        background: '#7c3aed',
+        color: '#ffffff'
+      });
     }
+  }
+
+  // Método auxiliar para obtener el nombre legible del rol
+  private getRoleDisplayName(role: UserRole): string {
+    const roleNames = {
+      [UserRole.ADMIN]: 'Administrador',
+      [UserRole.PROGRAMMER]: 'Programador',
+      [UserRole.USER]: 'Usuario'
+    };
+    return roleNames[role] || role;
   }
 
   async deleteUser(userId: string): Promise<void> {
@@ -217,7 +254,7 @@ export class AdminDashboardComponent implements OnInit {
 
   resetScheduleForm(): void {
     this.newSchedule = {
-      date: new Date(),
+      date: '',
       startTime: '09:00',
       endTime: '17:00',
       isActive: true
@@ -226,51 +263,79 @@ export class AdminDashboardComponent implements OnInit {
 
   async createSchedule(): Promise<void> {
     if (!this.selectedProgrammerId) {
-      alert('Selecciona un programador');
+      Swal.fire({
+        title: 'Error',
+        text: 'Selecciona un programador',
+        background: '#7c3aed',
+        color: '#ffffff'
+      });
       return;
     }
 
     try {
       const programmerName = this.getProgrammerName(this.selectedProgrammerId);
 
+      // Convertir la fecha correctamente para evitar problemas de zona horaria
+      const dateString = this.newSchedule.date;
+      const [year, month, day] = dateString.split('-').map(Number);
+      const correctDate = new Date(year, month - 1, day); // month - 1 porque enero es 0
+
       const scheduleData: Omit<Schedule, 'id'> = {
         programmerId: this.selectedProgrammerId,
         programmerName: programmerName,
-        date: this.newSchedule.date,
+        date: correctDate,
         startTime: this.newSchedule.startTime,
         endTime: this.newSchedule.endTime,
         isActive: this.newSchedule.isActive
       };
 
       await this.scheduleService.createSchedule(scheduleData);
-      alert('Horario creado exitosamente');
+      Swal.fire({
+        title: 'Horario creado exitosamente',
+        timer: 2000,
+        background: '#7c3aed',
+        color: '#ffffff'
+      });
       this.closeScheduleModal();
       this.loadSchedules();
     } catch (error) {
       console.error('Error creando horario:', error);
-      alert('Error al crear el horario');
-    }
-  }
-
-  async toggleScheduleStatus(scheduleId: string, currentStatus: boolean): Promise<void> {
-    try {
-      await this.scheduleService.toggleSchedule(scheduleId, !currentStatus);
-      this.loadSchedules();
-    } catch (error) {
-      console.error('Error cambiando estado del horario:', error);
-      alert('Error al cambiar el estado');
+      Swal.fire({
+        title: 'Error al crear el horario',
+        background: '#7c3aed',
+        color: '#ffffff'
+      });
     }
   }
 
   async deleteSchedule(scheduleId: string): Promise<void> {
-    if (confirm('¿Eliminar este horario?')) {
+    const result = await Swal.fire({
+      title: '¿Eliminar este horario?',
+      text: 'Esta acción no se puede deshacer',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#7c3aed',
+      color: '#ffffff'
+    });
+
+    if (result.isConfirmed) {
       try {
         await this.scheduleService.deleteSchedule(scheduleId);
-        alert('Horario eliminado');
+        Swal.fire({
+          title: 'Horario eliminado',
+          timer: 2000,
+          background: '#7c3aed',
+          color: '#ffffff'
+        });
         this.loadSchedules();
       } catch (error) {
         console.error('Error eliminando horario:', error);
-        alert('Error al eliminar el horario');
+        Swal.fire({
+          title: 'Error al eliminar',
+          background: '#7c3aed',
+          color: '#ffffff'
+        });
       }
     }
   }
@@ -296,12 +361,16 @@ export class AdminDashboardComponent implements OnInit {
       dateObj = new Date(date);
     }
 
-    return dateObj.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    // Usar UTC para evitar problemas de zona horaria
+    const weekdays = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+    const weekday = weekdays[dateObj.getUTCDay()];
+    const day = dateObj.getUTCDate();
+    const month = months[dateObj.getUTCMonth()];
+    const year = dateObj.getUTCFullYear();
+
+    return `${weekday}, ${day} de ${month} de ${year}`;
   }
 
   formatDateShort(date: any): string {
@@ -316,7 +385,12 @@ export class AdminDashboardComponent implements OnInit {
       dateObj = new Date(date);
     }
 
-    return dateObj.toLocaleDateString('es-ES');
+    // Usar UTC para evitar problemas de zona horaria
+    const day = dateObj.getUTCDate().toString().padStart(2, '0');
+    const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0');
+    const year = dateObj.getUTCFullYear();
+
+    return `${day}/${month}/${year}`;
   }
 
   getCurrentDate(): string {

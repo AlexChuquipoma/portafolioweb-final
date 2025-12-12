@@ -12,6 +12,11 @@ export class EmailService {
   private readonly TEMPLATE_NEW_ADVISORY = 'template_l9bes1c';  // Template ID del primer template
   private readonly TEMPLATE_ADVISORY_RESPONSE = 'template_xoqq0bc';  // Template ID del segundo template
 
+  // Configuración para formulario de contacto (segunda cuenta)
+  private readonly CONTACT_PUBLIC_KEY = 'Nf-9esgxSOfmqb5zj';  // Public Key de la segunda cuenta
+  private readonly CONTACT_SERVICE_ID = 'service_nw5ctfl';    // Service ID de la segunda cuenta
+  private readonly CONTACT_TEMPLATE_ID = 'template_duywrn5';  // Template ID para contacto
+
   constructor() {
     // Inicializar EmailJS con tu Public Key
     emailjs.init(this.PUBLIC_KEY);
@@ -152,5 +157,44 @@ export class EmailService {
     return this.PUBLIC_KEY !== 'kktEDGVaLELfRoLHg' &&
            this.TEMPLATE_NEW_ADVISORY !== 'template_l9bes1c' &&
            this.TEMPLATE_ADVISORY_RESPONSE !== 'template_xoqq0bc';
+  }
+
+  /**
+   * Enviar mensaje desde el formulario de contacto del portafolio
+   */
+  async sendContactMessage(contactData: {
+    from_name: string;
+    from_email: string;
+    message: string;
+  }): Promise<{ success: boolean; message: string }> {
+    try {
+      const templateParams = {
+        from_name: contactData.from_name,
+        from_email: contactData.from_email,
+        message: contactData.message,
+      };
+
+      console.log('📧 Enviando mensaje de contacto:', templateParams);
+
+      // Usar la segunda cuenta de EmailJS para el formulario de contacto
+      const response = await emailjs.send(
+        this.CONTACT_SERVICE_ID,
+        this.CONTACT_TEMPLATE_ID,
+        templateParams,
+        this.CONTACT_PUBLIC_KEY  // Usar la public key de la segunda cuenta
+      );
+
+      console.log('✅ Mensaje enviado exitosamente:', response);
+      return {
+        success: true,
+        message: '¡Mensaje enviado exitosamente! Te responderé pronto.'
+      };
+    } catch (error) {
+      console.error('❌ Error al enviar mensaje de contacto:', error);
+      return {
+        success: false,
+        message: 'Error al enviar el mensaje. Por favor intenta de nuevo.'
+      };
+    }
   }
 }

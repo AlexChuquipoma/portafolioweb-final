@@ -49,21 +49,104 @@
     </div>
 
     <div class="max-w-lg mx-auto bg-slate-800/50 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/10">
-      <form class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Nombre</label>
-          <input type="text" class="w-full px-4 py-3 bg-slate-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+      <!-- Mensaje para usuarios NO autenticados -->
+      <div *ngIf="!isAuthenticated" class="text-center py-8">
+        <div class="mb-6">
+          <svg class="w-20 h-20 mx-auto text-purple-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          <h3 class="text-2xl font-bold text-white mb-3">Inicia Sesión para Contactar</h3>
+          <p class="text-gray-300 mb-6 leading-relaxed">
+            Para poder enviar un mensaje al programador necesitas <span class="text-purple-400 font-semibold">iniciar sesión</span> o <span class="text-pink-400 font-semibold">registrarte</span> si no tienes una cuenta.
+          </p>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-          <input type="email" class="w-full px-4 py-3 bg-slate-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button
+            (click)="goToLogin()"
+            class="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105 shadow-lg">
+            Iniciar Sesión
+          </button>
+          <button
+            (click)="goToRegister()"
+            class="px-8 py-3 bg-slate-700 text-white font-semibold rounded-lg hover:bg-slate-600 transition transform hover:scale-105 border border-white/20">
+            Registrarse
+          </button>
         </div>
+      </div>
+
+      <!-- Formulario para usuarios autenticados -->
+      <form *ngIf="isAuthenticated" [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Nombre -->
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Mensaje</label>
-          <textarea rows="4" class="w-full px-4 py-3 bg-slate-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"></textarea>
+          <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Nombre</label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            placeholder="Tu nombre"
+            class="w-full px-4 py-3 bg-slate-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+            [class.border-red-500]="name?.invalid && name?.touched">
+          <p *ngIf="name?.invalid && name?.touched" class="mt-2 text-sm text-red-400">
+            <span *ngIf="name?.errors?.['required']">El nombre es requerido</span>
+            <span *ngIf="name?.errors?.['minlength']">El nombre debe tener al menos 2 caracteres</span>
+          </p>
         </div>
-        <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105">
-          Enviar Mensaje
+
+        <!-- Email -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="tu@email.com"
+            class="w-full px-4 py-3 bg-slate-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+            [class.border-red-500]="email?.invalid && email?.touched">
+          <p *ngIf="email?.invalid && email?.touched" class="mt-2 text-sm text-red-400">
+            <span *ngIf="email?.errors?.['required']">El email es requerido</span>
+            <span *ngIf="email?.errors?.['email']">Email inválido</span>
+          </p>
+        </div>
+
+        <!-- Mensaje -->
+        <div>
+          <label for="message" class="block text-sm font-medium text-gray-300 mb-2">Mensaje</label>
+          <textarea
+            id="message"
+            formControlName="message"
+            rows="4"
+            placeholder="Escribe tu mensaje aquí..."
+            class="w-full px-4 py-3 bg-slate-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+            [class.border-red-500]="message?.invalid && message?.touched"></textarea>
+          <p *ngIf="message?.invalid && message?.touched" class="mt-2 text-sm text-red-400">
+            <span *ngIf="message?.errors?.['required']">El mensaje es requerido</span>
+            <span *ngIf="message?.errors?.['minlength']">El mensaje debe tener al menos 10 caracteres</span>
+          </p>
+        </div>
+
+        <!-- Mensaje de éxito/error -->
+        <div *ngIf="submitMessage"
+             [class]="submitSuccess ? 'bg-green-500/10 border border-green-500/50' : 'bg-red-500/10 border border-red-500/50'"
+             class="rounded-lg p-4">
+          <p [class]="submitSuccess ? 'text-green-400' : 'text-red-400'" class="text-sm">
+            {{ submitMessage }}
+          </p>
+        </div>
+
+        <!-- Botón Submit -->
+        <button
+          type="submit"
+          [disabled]="contactForm.invalid || isSubmitting"
+          class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+          <span *ngIf="!isSubmitting">Enviar Mensaje</span>
+          <span *ngIf="isSubmitting" class="flex items-center justify-center gap-2">
+            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Enviando...
+          </span>
         </button>
       </form>
     </div>

@@ -43,37 +43,37 @@ export class PortfolioJuanComponent implements OnInit {
     image: '/imagenes/juan.png',
     bio: 'Soy Juan Fernández, un desarrollador web dedicado a construir aplicaciones web atractivas y funcionales.',
     description: 'Tengo experiencia en el desarrollo front-end y back-end, utilizando tecnologías como Angular, Node.js y bases de datos NoSQL.',
-    email: 'juan@example.com',
+    email: 'Fernandezj159@hotmail.com',
     github: 'https://github.com/Juan0Fernandez',
     linkedin:'https://www.linkedin.com/in/juan-fernandez-074a3734b/' ,
-    whatsapp: '593983592464'
+    whatsapp: '593979173286'
   };
 
   projects: ProjectInfo[] = [
     {
       id: 1,
       title: 'Proyecto Angular Formularios',
-      description: 'Formularios simple y dinamico.',
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500',
-      technologies: ['Angular', 'D3.js', 'Node.js', 'Chart.js'],
+      description: 'Formulario realizado en el entorno de desarrollo Visual Studio Code, formulario simple y dinamico.',
+      image: 'https://bias.academy/wp-content/uploads/2025/03/Heuristicas-no-UX.jpg',
+      technologies: ['Angular','Node.js', 'TypeScript'],
       link: 'https://juan0fernandez.github.io/Programaci-n-y-Plataformas-Web-Clases/',
       github: 'https://github.com/Juan0Fernandez/Programaci-n-y-Plataformas-Web-Clases'
     },
     {
       id: 2,
       title: 'Heuristicas web',
-      description: 'Plataforma con una interfaz centrada  con una segunda parte con contenido de heuristicas.',
-      image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=500',
-      technologies: ['Next.js', 'TypeScript', 'Prisma', 'Tailwind'],
+      description: 'Plataforma con una interfaz centrada  seguido de una segunda parte con contenido de 10 heuristicas realizadas en VS Code.',
+      image: 'https://cdn.prod.website-files.com/6474afeeb40eaf59586560eb/64aac931ef5d25bb34107199_Audit2.jpg',
+      technologies: ['Angular', 'TypeScript', 'Tailwind'],
       link: 'https://juan0fernandez.github.io/02-ui-components/',
       github: 'https://github.com/Juan0Fernandez/icc-ppw-03-ui-fundamentos.git'
     },
     {
       id: 3,
       title: 'Simpson page',
-      description: 'Aplicación web que muestra información de personajes de Los Simpson utilizando una API pública.',
-      image: 'https://images.unsplash.com/photo-1592210454359-9043f067919b?w=500',
-      technologies: ['React', 'OpenWeather API', 'Mapbox', 'Redux'],
+      description: 'Aplicación web que muestra información de personajes de Los Simpson utilizando el consumo de una API pública.',
+      image: 'https://hips.hearstapps.com/es.h-cdn.co/teleprogramaes/images/series-tv/2017/marzo/dia-mundial-de-los-simpson-antena-3/11679727-1-esl-ES/antena-3-crea-el-dia-mundial-de-los-simpson.jpg',
+      technologies: ['Angular', 'TypeScript', 'Tailwind'],
       link: 'https://juan0fernandez.github.io/icc-ppw-03-ui-fundamentos/',
       github: 'https://github.com/Juan0Fernandez/icc-ppw-03-ui-fundamentos.git'
     }

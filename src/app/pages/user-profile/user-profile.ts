@@ -4,12 +4,13 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractContro
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
+import { CloudinaryService } from '../../core/services/cloudinary.service';
 import { User } from '../../shared/models/user.model';
 import { UserRole } from '../../shared/interfaces/role.interface';
 import { updateProfile, updatePassword } from '@angular/fire/auth';
-import { getStorage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
 import { NavbarComponent, NavMenuItem } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-user-profile',
@@ -36,6 +37,7 @@ export class UserProfile implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private userService: UserService,
+    private cloudinaryService: CloudinaryService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -175,16 +177,26 @@ export class UserProfile implements OnInit {
     if (input.files && input.files[0]) {
       this.selectedFile = input.files[0];
 
-      // Validar que sea una imagen
-      if (!this.selectedFile.type.startsWith('image/')) {
-        this.errorMessage = 'Por favor selecciona un archivo de imagen válido';
+      // Validar que sea una imagen válida
+      if (!this.cloudinaryService.isValidImage(this.selectedFile)) {
+        Swal.fire({
+          title: 'Formato no válido',
+          text: 'Por favor selecciona una imagen en formato JPG, PNG, GIF o WEBP',
+          background: '#7c3aed',
+          color: '#ffffff'
+        });
         this.selectedFile = null;
         return;
       }
 
       // Validar tamaño (max 5MB)
-      if (this.selectedFile.size > 5 * 1024 * 1024) {
-        this.errorMessage = 'La imagen no debe superar los 5MB';
+      if (!this.cloudinaryService.isValidSize(this.selectedFile)) {
+        Swal.fire({
+          title: 'Imagen muy grande',
+          text: 'La imagen no debe superar los 5MB',
+          background: '#7c3aed',
+          color: '#ffffff'
+        });
         this.selectedFile = null;
         return;
       }
@@ -195,7 +207,7 @@ export class UserProfile implements OnInit {
   }
 
   /**
-   * Subir foto a Firebase Storage
+   * Subir foto a Cloudinary
    */
   async uploadPhoto(): Promise<void> {
     if (!this.selectedFile || !this.currentUser) return;
@@ -205,14 +217,20 @@ export class UserProfile implements OnInit {
       this.errorMessage = '';
       this.successMessage = '';
 
-      const storage = getStorage();
-      const fileRef = ref(storage, `profile-photos/${this.currentUser.uid}/${Date.now()}_${this.selectedFile.name}`);
+      // Mostrar indicador de carga
+      Swal.fire({
+        title: 'Subiendo imagen...',
+        text: 'Por favor espera',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+        background: '#7c3aed',
+        color: '#ffffff'
+      });
 
-      // Subir archivo
-      await uploadBytes(fileRef, this.selectedFile);
-
-      // Obtener URL de descarga
-      const photoURL = await getDownloadURL(fileRef);
+      // Subir a Cloudinary
+      const photoURL = await this.cloudinaryService.uploadImage(this.selectedFile);
 
       // Actualizar perfil en Authentication
       await updateProfile(this.currentUser, { photoURL });
@@ -226,10 +244,27 @@ export class UserProfile implements OnInit {
         this.userData.photoURL = photoURL;
       }
 
+      // Cerrar modal de carga y mostrar éxito
+      Swal.fire({
+        title: '¡Foto actualizada!',
+        text: 'Tu foto de perfil se ha actualizado exitosamente',
+        timer: 2000,
+        background: '#7c3aed',
+        color: '#ffffff'
+      });
+
       this.successMessage = '¡Foto actualizada exitosamente!';
       setTimeout(() => this.successMessage = '', 3000);
     } catch (error) {
       console.error('Error subiendo foto:', error);
+
+      Swal.fire({
+        title: 'Error al subir',
+        text: 'No se pudo subir la imagen. Intenta de nuevo.',
+        background: '#7c3aed',
+        color: '#ffffff'
+      });
+
       this.errorMessage = 'Error al subir la foto. Intenta de nuevo.';
     } finally {
       this.saving = false;

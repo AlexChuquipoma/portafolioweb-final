@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NavbarComponent, NavMenuItem } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { AdvisoryModalComponent } from '../../../shared/components/advisory-modal/advisory-modal.component';
+import Swal from 'sweetalert2';
 
 interface Developer {
   id: number;
@@ -68,23 +69,23 @@ export class PortfolioComponent implements OnInit {
   features: Feature[] = [
     {
       icon: '👥',
-      title: 'Multi-User Portfolios',
-      description: 'Admin-managed accounts for programmers to showcase their work.'
+      title: 'Carteras multiusuario',
+      description: 'Cuentas administradas por el administrador para que los programadores muestren su trabajo.'
     },
     {
       icon: '📅',
-      title: 'Advisory Booking',
-      description: 'External users can easily schedule advisory sessions with available programmers.'
+      title: 'Reserva de asesoramiento',
+      description: 'Los usuarios externos pueden programar fácilmente sesiones de asesoramiento con los programadores disponibles.'
     },
     {
       icon: '💡',
-      title: 'AI Idea Generator',
-      description: 'Leverage AI to generate unique project ideas and overcome creative blocks.'
+      title: 'Sistema de Notificaciones Válidas',
+      description: 'Implemente notificaciones seguras y validadas para administradores, programadores y usuarios, asegurando una comunicación oportuna y verificada dentro del sistema.'
     },
     {
       icon: '🔐',
-      title: 'Role-Based Access',
-      description: 'Secure and distinct dashboards for Admins, Programmers, and Users.'
+      title: 'Acceso basado en roles',
+      description: 'Paneles de control seguros y diferenciados para administradores, programadores y usuarios.'
     }
   ];
 
@@ -161,8 +162,19 @@ export class PortfolioComponent implements OnInit {
   openAdvisoryModal(): void {
     // Verificar si el usuario está autenticado
     if (!this.currentUser) {
-      alert('Por favor inicia sesión para agendar una asesoría');
-      this.router.navigate(['/login']);
+      Swal.fire({
+        title: 'Inicia Sesión',
+        text: 'Para agendar una asesoría necesitas iniciar sesión o registrarte.',
+        showCancelButton: true,
+        confirmButtonText: 'Iniciar Sesión',
+        cancelButtonText: 'Cancelar',
+        background: '#7c3aed',
+        color: '#ffffff'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.router.navigate(['/login']);
+        }
+      });
       return;
     }
     this.showAdvisoryModal = true;
