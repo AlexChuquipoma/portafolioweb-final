@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ProjectService } from '../../../core/services/project.service';
+import { Project, ProjectType } from '../../../shared/interfaces/project.interface';
 import { NavbarComponent, NavLink } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { HeroSectionComponent, DeveloperInfo } from '../../../shared/components/developer/hero-section/hero-section';
@@ -26,6 +28,7 @@ import { ContactSection } from '../../../shared/components/developer/contact-sec
 })
 export class PortfolioJuanComponent implements OnInit {
   currentUser: any = null;
+  juanUID = 'L96lG4v5Y7PbDSuA0iTy8RtKOYB2'; // UID de Juan en Firebase
 
   // Enlaces personalizados para el navbar
   customNavLinks: NavLink[] = [
@@ -49,35 +52,9 @@ export class PortfolioJuanComponent implements OnInit {
     whatsapp: '593979173286'
   };
 
-  projects: ProjectInfo[] = [
-    {
-      id: 1,
-      title: 'Proyecto Angular Formularios',
-      description: 'Formulario realizado en el entorno de desarrollo Visual Studio Code, formulario simple y dinamico.',
-      image: 'https://bias.academy/wp-content/uploads/2025/03/Heuristicas-no-UX.jpg',
-      technologies: ['Angular','Node.js', 'TypeScript'],
-      link: 'https://juan0fernandez.github.io/Programaci-n-y-Plataformas-Web-Clases/',
-      github: 'https://github.com/Juan0Fernandez/Programaci-n-y-Plataformas-Web-Clases'
-    },
-    {
-      id: 2,
-      title: 'Heuristicas web',
-      description: 'Plataforma con una interfaz centrada  seguido de una segunda parte con contenido de 10 heuristicas realizadas en VS Code.',
-      image: 'https://cdn.prod.website-files.com/6474afeeb40eaf59586560eb/64aac931ef5d25bb34107199_Audit2.jpg',
-      technologies: ['Angular', 'TypeScript', 'Tailwind'],
-      link: 'https://juan0fernandez.github.io/02-ui-components/',
-      github: 'https://github.com/Juan0Fernandez/icc-ppw-03-ui-fundamentos.git'
-    },
-    {
-      id: 3,
-      title: 'Simpson page',
-      description: 'Aplicación web que muestra información de personajes de Los Simpson utilizando el consumo de una API pública.',
-      image: 'https://hips.hearstapps.com/es.h-cdn.co/teleprogramaes/images/series-tv/2017/marzo/dia-mundial-de-los-simpson-antena-3/11679727-1-esl-ES/antena-3-crea-el-dia-mundial-de-los-simpson.jpg',
-      technologies: ['Angular', 'TypeScript', 'Tailwind'],
-      link: 'https://juan0fernandez.github.io/icc-ppw-03-ui-fundamentos/',
-      github: 'https://github.com/Juan0Fernandez/icc-ppw-03-ui-fundamentos.git'
-    }
-  ];
+  // Proyectos dinámicos desde Firestore
+  projects: ProjectInfo[] = [];
+  loadingProjects = true;
 
   skills: SkillInfo[] = [
     { name: 'HTML/CSS', level: 95, icon: '🎨' },
@@ -90,12 +67,47 @@ export class PortfolioJuanComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private projectService: ProjectService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.authService.user$.subscribe(user => {
       this.currentUser = user;
+    });
+
+    // Cargar proyectos desde Firestore
+    this.loadProjects();
+  }
+
+  /**
+   * Cargar proyectos dinámicamente desde Firestore
+   */
+  loadProjects(): void {
+    this.loadingProjects = true;
+
+    this.projectService.getProjectsByProgrammer(this.juanUID).subscribe({
+      next: (firestoreProjects: Project[]) => {
+        // Convertir de Project (Firestore) a ProjectInfo (UI)
+        this.projects = firestoreProjects.map((project, index) => ({
+          id: index + 1,
+          title: project.name,
+          description: project.description,
+          image: project.imageUrl || 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=500',
+          technologies: project.technologies || [],
+          link: project.demoUrl || '',
+          github: project.repositoryUrl || ''
+        }));
+
+        this.loadingProjects = false;
+        console.log('✅ Proyectos de Juan cargados:', this.projects);
+      },
+      error: (error) => {
+        console.error('❌ Error cargando proyectos:', error);
+        this.loadingProjects = false;
+        // Mantener array vacío si hay error
+        this.projects = [];
+      }
     });
   }
 

@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ProjectService } from '../../../core/services/project.service';
+import { UserService } from '../../../core/services/user.service';
+import { Project, ProjectType } from '../../../shared/interfaces/project.interface';
 import { NavbarComponent, NavLink } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { HeroSectionComponent, DeveloperInfo } from '../../../shared/components/developer/hero-section/hero-section';
@@ -26,6 +29,7 @@ import { ContactSection } from '../../../shared/components/developer/contact-sec
 })
 export class PortfolioAlexanderComponent implements OnInit {
   currentUser: any = null;
+  alexanderUID = 'XJnEWmE7HLdP5ILsFj5ufQzgWvf2'; // UID de Alexander en Firebase
 
   // Enlaces personalizados para el navbar
   customNavLinks: NavLink[] = [
@@ -49,53 +53,9 @@ export class PortfolioAlexanderComponent implements OnInit {
     whatsapp: '593983592464'
   };
 
-  projects: ProjectInfo[] = [
-    {
-      id: 1,
-      title: 'Fundamentos Web - Unidad 1',
-      description: 'Proyecto educativo de fundamentos de programación web, desarrollado con TypeScript, HTML y SCSS.',
-      image: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=500',
-      technologies: ['TypeScript', 'HTML', 'SCSS'],
-      link: 'https://alexchuquipoma.github.io/icc-ppw-u2-01Fundamentos/',
-      github: 'https://github.com/AlexChuquipoma/icc-ppw-u2-01Fundamentos'
-    },
-    {
-      id: 2,
-      title: 'Fundamentos Web - Unidad 2',
-      description: 'Segunda unidad de fundamentos web construida con Astro, framework moderno para sitios web rápidos.',
-      image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500',
-      technologies: ['Astro', 'JavaScript'],
-      link: 'https://alexchuquipoma.github.io/icc-ppw-u2-02Fundamentos/',
-      github: 'https://github.com/AlexChuquipoma/icc-ppw-u2-02Fundamentos'
-    },
-    {
-      id: 3,
-      title: 'App de Heurísticas UI',
-      description: 'Aplicación de componentes UI enfocada en heurísticas de usabilidad y diseño de interfaces.',
-      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500',
-      technologies: ['HTML', 'TypeScript', 'CSS'],
-      link: 'https://alexchuquipoma.github.io/02-ui-componentes/',
-      github: 'https://github.com/AlexChuquipoma/02-ui-componentes'
-    },
-    {
-      id: 4,
-      title: 'Estilos y Componentes UI',
-      description: 'Proyecto de componentes UI reutilizables con estilos personalizados y diseño moderno.',
-      image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=500',
-      technologies: ['HTML', 'TypeScript', 'CSS'],
-      link: 'https://alexchuquipoma.github.io/03-ui-componentes-/',
-      github: 'https://github.com/AlexChuquipoma/03-ui-componentes-'
-    },
-    {
-      id: 5,
-      title: 'Pokémon App',
-      description: 'Aplicación interactiva de Pokémon con búsqueda, filtros y visualización de información detallada.',
-      image: 'https://images.unsplash.com/photo-1542779283-429940ce8336?w=500',
-      technologies: ['HTML', 'TypeScript', 'CSS'],
-      link: 'https://alexchuquipoma.github.io/prueba2/',
-      github: 'https://github.com/AlexChuquipoma/prueba2'
-    }
-  ];
+  // Proyectos dinámicos desde Firestore
+  projects: ProjectInfo[] = [];
+  loadingProjects = true;
 
   skills: SkillInfo[] = [
     { name: 'Angular', level: 95, icon: '🅰️' },
@@ -108,12 +68,47 @@ export class PortfolioAlexanderComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private projectService: ProjectService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.authService.user$.subscribe(user => {
       this.currentUser = user;
+    });
+
+    // Cargar proyectos desde Firestore
+    this.loadProjects();
+  }
+
+  /**
+   * Cargar proyectos dinámicamente desde Firestore
+   */
+  loadProjects(): void {
+    this.loadingProjects = true;
+
+    this.projectService.getProjectsByProgrammer(this.alexanderUID).subscribe({
+      next: (firestoreProjects: Project[]) => {
+        // Convertir de Project (Firestore) a ProjectInfo (UI)
+        this.projects = firestoreProjects.map((project, index) => ({
+          id: index + 1,
+          title: project.name,
+          description: project.description,
+          image: project.imageUrl || 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=500',
+          technologies: project.technologies || [],
+          link: project.demoUrl || '',
+          github: project.repositoryUrl || ''
+        }));
+
+        this.loadingProjects = false;
+        console.log('✅ Proyectos de Alexander cargados:', this.projects);
+      },
+      error: (error) => {
+        console.error('❌ Error cargando proyectos:', error);
+        this.loadingProjects = false;
+        // Mantener array vacío si hay error
+        this.projects = [];
+      }
     });
   }
 

@@ -1,9 +1,6 @@
 # INFORME DEL PROYECTO
 ## Portafolio Web - Plataforma de Gestión de Programadores
 
----
-
-## 1. Logo de la Carrera y del Proyecto
 
 <div align="center">
 
@@ -43,7 +40,7 @@
 
 **Correo de contacto del proyecto:** achuquipoma@est.ups.edu.ec
 
-**Repositorio del Proyecto:** *[Pendiente de publicación]*
+**Repositorio del Proyecto:** *[[Pagina Despegable](https://portafolio-b7410.web.app/portfolio)]*
 
 ---
 
@@ -85,7 +82,6 @@
 - **Angular 21.0.0** - Framework principal para la construcción de la SPA
 - **TypeScript 5.9.2** - Lenguaje de programación tipado
 - **Tailwind CSS 4.1.12** - Framework de utilidades CSS
-- **RxJS 7.8.0** - Programación reactiva y manejo de observables
 - **Angular Router** - Navegación y gestión de rutas
 
 ### 🗄️ Backend y Base de Datos
@@ -100,9 +96,8 @@
   - Sincronización en tiempo real
   - Consultas complejas con filtros
 
-- **Firebase Storage** - Almacenamiento de archivos
-  - Fotos de perfil de usuarios
-  - Imágenes de proyectos
+- **Cloudinary** - Almacenamiento de archivos
+  - Fotos de perfil de usuarios mediante links hacia firebase
 
 ### 📧 Servicios Externos
 
@@ -1442,7 +1437,5 @@ Para consultas, sugerencias o reportes de bugs:
 **Proyecto Académico - 2025**
 
 ---
-
-**Desarrollado con ❤️ por Alexander Chuquipoma y Juan Fernández**
 
 </div>
