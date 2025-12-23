@@ -20,14 +20,14 @@ export const routes: Routes = [
   { path: 'portfolio/juan', component: PortfolioJuanComponent },
   { path: 'setup', component: SetupComponent },
 
-  // Ruta de perfil (requiere autenticación)
+  // Ruta de perfil, autentificacion
   {
     path: 'profile',
     component: UserProfile,
     canActivate: [authGuard]
   },
 
-  // Rutas protegidas por rol
+  //  Rutas protegidas por  rol
   {
     path: 'admin',
     component: AdminDashboardComponent,

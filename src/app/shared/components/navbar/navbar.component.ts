@@ -28,11 +28,11 @@ export class NavbarComponent implements OnInit, OnDestroy, OnChanges {
   @Input() showDashboardLink: boolean = false;
   @Input() additionalMenuItems: NavMenuItem[] = [];
   @Input() customNavLinks: NavLink[] = [];
-  @Input() hideNavLinks: boolean = false; // Para ocultar los enlaces de navegación en dashboards
+  @Input() hideNavLinks: boolean = false; // Oculta los enlaces de navegación en dashboards
   @Output() logoutEvent = new EventEmitter<void>();
   @Output() scrollToEvent = new EventEmitter<string>();
 
-  // Enlaces de navegación por defecto (para la página principal)
+  // Enlaces de navegación por defecto 
   defaultNavLinks: NavLink[] = [
     { label: 'Inicio', sectionId: 'home' },
     { label: 'Características', sectionId: 'about' },
@@ -80,7 +80,7 @@ export class NavbarComponent implements OnInit, OnDestroy, OnChanges {
     this.notificationSubscription = this.notificationService
       .getUserNotifications(this.currentUser.uid)
       .subscribe(notifications => {
-        this.notifications = notifications.slice(0, 5); // Mostrar solo las 5 más recientes
+        this.notifications = notifications.slice(0, 5); // Mostrar solo las 5 
         this.unreadCount = notifications.filter(n => !n.read).length;
       });
   }
